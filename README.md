@@ -62,12 +62,12 @@ angular
 
 ### bower
 ``` bash
-$ bower install FireNeslo/fnsimpledragdrop.git --save
+$ bower install FireNeslo/fnsimpledragdrop --save
 ```
 
 ### demo [http://fireneslo.github.io/fnsimpledragdrop/](http://fireneslo.github.io/fnsimpledragdrop/)
 ``` bash
-$ git clone https://github.com/FireNeslo/fnsimpledragdrop
+$ git clone https://github.com/FireNeslo/fnsimpledragdrop.git
 $ cd fnsimpledragdrop
 $ npm install && bower install
 $ gulp demo
