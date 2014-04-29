@@ -1,0 +1,15 @@
+'use strict';
+
+angular.module('fnSimpleDragDropApp')
+  .controller('MainCtrl', function ($scope) {
+		$scope.source = [0,1,2,3,4,5,6,7,8,9];
+		$scope.target = [];
+		$scope.drop = function(from, to, data, $index) {
+			$index === undefined && ($index = to.length-1);
+			var index = from.indexOf(data), temp;
+			if(index > -1) {
+				to.splice($index,0, data);
+				from.splice(index,1);
+			}
+		};
+  });

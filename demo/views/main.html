@@ -1,0 +1,7 @@
+<ul class="list-inline well" fn-drop="drop(target, source, data, over)">
+    <li fn-drag-over="$index" fn-drag="data" ng-repeat="data in source track by $index">{{data}}</li>
+</ul>
+
+<ul class="list-inline well" fn-drop="drop(source, target, data, over)">
+    <li fn-drag-over="$index" fn-drag="data" ng-repeat="data in target track by $index">{{data}}</li>
+</ul>
