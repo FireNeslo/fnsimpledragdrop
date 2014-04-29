@@ -1,5 +1,7 @@
 # introduction
-I think it would be neat to have a simple filesystem for the browser.
+I really liked [logicbomb/lvldragdrop](https://github.com/logicbomb/lvldragdrop).
+but there was a problem it used elements, and that i could simply not have.
+that is why i decided to create a directive that removes any need for dom and let det data take control.
 
 ## Requirements
 * [nodejs](http://nodejs.org)
@@ -20,6 +22,19 @@ I think it would be neat to have a simple filesystem for the browser.
   </ul>
 </div>
 ```
+
+#### fn-drag
+Simply lets you drag the element and let you attach some data to that element.
+
+#### fn-drop
+Lets you attach an ondro function that provides to arguments data and over
+
+* over: is the data provided by the fn-drag-over directive or undefined if no value is provided
+* data: is the data that is dropped
+
+#### fn-drag-over
+Lets you add additional info to the drop directive about where it whas dropped
+
 ### Controller
 
 ```js
