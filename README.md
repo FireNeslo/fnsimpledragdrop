@@ -11,49 +11,35 @@ I think it would be neat to have a simple filesystem for the browser.
 ### View
 
 ```
-
-    <div ng-controller="MainCtrl">
-        <ul class="list-inline well" fn-drop="drop(target, source, data, over)">
-            <li fn-drag-over="$index" fn-drag="data" ng-repeat="data in source track by $index">{{data}}</li>
-        </ul>
-
-        <ul class="list-inline well" fn-drop="drop(source, target, data, over)">
-            <li fn-drag-over="$index" fn-drag="data" ng-repeat="data in target track by $index">{{data}}</li>
-        </ul>
-        ```
-        ```js
-        <ul class="list-inline well" fn-drop="drop(target, source, data, over)">
-            <li fn-drag-over="$index" fn-drag="data" ng-repeat="data in source track by $index">{{data}}</li>
-        </ul>
-
-        <ul class="list-inline well" fn-drop="drop(source, target, data, over)">
-            <li fn-drag-over="$index" fn-drag="data" ng-repeat="data in target track by $index">{{data}}</li>
-        </ul>
-    </div>
-
+<div ng-controller="MainCtrl">
+    <ul class="list-inline well" fn-drop="drop(target, source, data, over)">
+        <li fn-drag-over="$index" fn-drag="data" ng-repeat="data in source track by $index">{{data}}</li>
+    </ul>
+    <ul class="list-inline well" fn-drop="drop(source, target, data, over)">
+        <li fn-drag-over="$index" fn-drag="data" ng-repeat="data in target track by $index">{{data}}</li>
+    </ul>
+</div>
 ```
 ### Controller
 
 ```js
-
-    angular.module('fnSimpleDragDropApp', ['fnSimpleDragDrop'])
-    .controller('MainCtrl', function ($scope) {
-        $scope.source = ['hello','guys','fun','with','drag','and','drop','is','it','not?'];
-        $scope.target = [];
-        $scope.drop = function(from, to, data, $index) {
-            $index === undefined && ($index = to.length);
-            var index = from.indexOf(data), temp;
-            if(index < 0) {
-                from = to;
-                index = from.indexOf(data);
-            }
-            if(index > -1) {
-                from.splice(index,1);
-                to.splice($index,0, data);
-            }
-        };
-    });
-
+angular.module('fnSimpleDragDropApp', ['fnSimpleDragDrop'])
+.controller('MainCtrl', function ($scope) {
+    $scope.source = ['hello','guys','fun','with','drag','and','drop','is','it','not?'];
+    $scope.target = [];
+    $scope.drop = function(from, to, data, $index) {
+        $index === undefined && ($index = to.length);
+        var index = from.indexOf(data), temp;
+        if(index < 0) {
+            from = to;
+            index = from.indexOf(data);
+        }
+        if(index > -1) {
+            from.splice(index,1);
+            to.splice($index,0, data);
+        }
+    };
+});
 ```
 
 ## Install
