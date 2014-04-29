@@ -6,12 +6,10 @@ directive('fnDragOver', function () {
 		link: function(scope, el, attrs, fnDrop) {
 			var on = el[0].addEventListener.bind(el[0]);
 			on("dragover", function() {
-				fnDrop.over(scope[attrs['fnDragOver']]);
-				scope.$apply();
+				fnDrop.over(scope.$eval(scope[attrs['fnDragOver']]));
 			});
 			on("dragleave", function() {
-				fnDrop.leave(scope[attrs['fnDragOver']]);
-				scope.$apply();
+				fnDrop.leave(scope.$eval(scope[attrs['fnDragOver']]));
 			});
 		}
 	};
