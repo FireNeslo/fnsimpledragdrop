@@ -5,6 +5,9 @@
     border: 1px solid blue;
 }
 .well li {
+    width: 1em;
+    height: 1em;
+    padding: 1em;
     margin: 1em;
     cursor: pointer;
 }
