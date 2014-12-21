@@ -8,3 +8,7 @@
     margin: 1em;
     cursor: pointer;
 }
+
+.fn-target li {
+    pointer-events: none;
+}

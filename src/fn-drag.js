@@ -14,7 +14,7 @@ directive('fnDrag', function ($rootScope) {
 		function dragEnd() {
 			$rootScope.$emit("fn-dragend", dragging);
 		}
-		on("dragstart", dragStart, false);
-		on("dragend", dragEnd,false);
+		on("dragstart", dragStart);
+		on("dragend", dragEnd);
 	};
 })
