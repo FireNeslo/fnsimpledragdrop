@@ -13,11 +13,25 @@ that is why i decided to create a directive that removes any need for dom and le
 ### View
 
 ```html
-<ul class="list-inline well" fn-drop="drop($source, $target, $data, $over)" fn-target="source">
-    <li fn-source="source" fn-drag-over="$index" fn-drag="data" ng-repeat="data in source track by $index">{{data}}</li>
+<ul class="list-inline well"
+    fn-target="source"
+    fn-drop="drop($source, $target, $data, $over)">
+    <li fn-drag="data"
+        fn-source="source"
+        fn-drag-over="$index"
+        ng-repeat="data in source track by $index">
+        {{data}}
+    </li>
 </ul>
-<ul class="list-inline well" fn-drop="drop($source, $target, $data, $over)" fn-target="target">
-    <li fn-source="target" fn-drag-over="$index" fn-drag="data" ng-repeat="data in target track by $index">{{data}}</li>
+<ul class="list-inline well"
+    fn-target="target"
+    fn-drop="drop($source, $target, $data, $over)">
+    <li fn-drag="data"
+        fn-source="target"
+        fn-drag-over="$index"
+        ng-repeat="data in target track by $index">
+        {{data}}
+    </li>
 </ul>
 ```
 
@@ -53,7 +67,7 @@ $ gulp demo
 
 ## Documentation
 
-#### fn-drop="fn($data, $over, $target, $source)"
+#### fn-drop="fn($data, $over, $target, $source)" class="fn-over"
 Lets you attach an on-drop function that provides these arguments (not position sensitive)
 <dl>
   <dt>$data</dt>
@@ -66,7 +80,7 @@ Lets you attach an on-drop function that provides these arguments (not position 
   <dd>source defined on the data being dragged see fn-source</dd>
 </dl>
 
-#### fn-drag="$data"
+#### fn-drag="$data" class="fn-dragging"
 Simply lets you drag the element and let you attach some data to that element.
 <dl>
   <dt>$data</dt>
@@ -93,4 +107,19 @@ Lets you add source data to drop event. (must be on same element as fn-drag)
 <dl>
   <dt>$source</dt>
   <dd>the current source data for the drop event</dd>
+</dl>
+
+
+### Events
+fn drag drop uses these events internally
+#### $rootScope.$on('fn-dragstart', dragStart)
+<dl>
+  <dt>dragStart($event, {data,source,target,element})</dt>
+  <dd>fires on dragstart</dd>
+</dl>
+
+#### $rootScope.$on('fn-dragend', dragEnd)
+<dl>
+  <dt>dragEnd($event, {data,source,target,over,element})</dt>
+  <dd>fires on dragend</dd>
 </dl>
