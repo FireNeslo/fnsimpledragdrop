@@ -31,7 +31,7 @@ directive('fnDrop', function ($rootScope) {
         id--;
         e.stopPropagation();
         e.preventDefault();
-        if(id === 0) {
+        if (id === 0) {
           el.removeClass('fn-over');
         }
       });

@@ -23,10 +23,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="fn-drop.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="fn-drop.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/fn-drop.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="9" selection-start="1015" selection-end="1015" vertical-scroll-proportion="0.9230769" vertical-offset="180" max-vertical-offset="1005">
+            <state line="36" column="9" selection-start="530" selection-end="1016" vertical-scroll-proportion="0.0" vertical-offset="360" max-vertical-offset="1005">
               <folding />
             </state>
           </provider>
@@ -44,16 +44,16 @@
       <file leaf-file-name="fn-drag-over.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/fn-drag-over.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="2" selection-start="379" selection-end="379" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
+            <state line="15" column="2" selection-start="416" selection-end="416" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="fn-drag.js" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="fn-drag.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/fn-drag.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="4" selection-start="594" selection-end="594" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="375">
+            <state line="18" column="0" selection-start="573" selection-end="573" vertical-scroll-proportion="0.61538464" vertical-offset="30" max-vertical-offset="420">
               <folding />
             </state>
           </provider>
@@ -156,10 +156,10 @@
         <option value="$PROJECT_DIR$/demo/views/main.html" />
         <option value="$PROJECT_DIR$/fn-simple-drag-drop.js" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/src/fn-drag.js" />
-        <option value="$PROJECT_DIR$/src/fn-drag-over.js" />
         <option value="$PROJECT_DIR$/demo/styles/main.css" />
         <option value="$PROJECT_DIR$/src/fn-drop.js" />
+        <option value="$PROJECT_DIR$/src/fn-drag-over.js" />
+        <option value="$PROJECT_DIR$/src/fn-drag.js" />
       </list>
     </option>
   </component>
@@ -743,23 +743,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/fn-drag.js">
+    <entry file="file://$PROJECT_DIR$/src/fn-drop.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="4" selection-start="594" selection-end="594" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="375">
+        <state line="36" column="9" selection-start="530" selection-end="1016" vertical-scroll-proportion="0.0" vertical-offset="360" max-vertical-offset="1005">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/fn-drag-over.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="2" selection-start="379" selection-end="379" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
+        <state line="15" column="2" selection-start="416" selection-end="416" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/fn-drop.js">
+    <entry file="file://$PROJECT_DIR$/src/fn-drag.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="9" selection-start="1015" selection-end="1015" vertical-scroll-proportion="0.9230769" vertical-offset="180" max-vertical-offset="1005">
+        <state line="18" column="0" selection-start="573" selection-end="573" vertical-scroll-proportion="0.61538464" vertical-offset="30" max-vertical-offset="420">
           <folding />
         </state>
       </provider>
