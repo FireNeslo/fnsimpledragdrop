@@ -1,6 +1,6 @@
 {
   "name": "fn-simple-drag-drop",
-  "version": "0.0.0",
+  "version": "1.0.0",
 	"main": "./fn-simple-drag-drop.js",
 	"description" : "What i think is a clean and useful drag and drop directive for angular",
 	"author" : "Øystein Ø. Olsen <fireneslo@gmail.com>",
