@@ -1,16 +1,17 @@
-directive('fnDragOver', function () {
-  'use strict';
+directive('fnDragOver', function (fnDragDrop) {
+  'use strict'
   return {
     restrict: 'A',
     require: '^fnDrop',
     link: function (scope, el, attrs, fnDrop) {
-      var on = el[0].addEventListener.bind(el[0]);
-      on("dragover", function () {
-        fnDrop.over(scope.$eval(attrs.fnDragOver));
-      });
-      on("dragleave", function () {
-        fnDrop.leave(scope.$eval(attrs.fnDragOver));
-      });
+      fnDragDrop(el[0])
+        .on("dragover", function onDragOver() {
+          debugger
+          fnDrop.over(scope.$eval(attrs.fnDragOver))
+        })
+        .on("dragleave", function onDragLeave() {
+          fnDrop.leave(scope.$eval(attrs.fnDragOver))
+        })
     }
-  };
+  }
 })
