@@ -5,26 +5,46 @@
     var dropped = [];
     var touched = null;
     var virtual = {};
-    var drags = {};
+    var drags = [];
     function nativeDragDrop(el) {
       return false;
       return 'draggable' in el || 'ondragstart' in el && 'ondrop' in el;
     }
+    /* onEnd will not always fire when multitouching,
+    therefore we have to check whether a touch event that no longer exist
+    ended or not, and remove the drag image if it has.
+  */
+    function sanityCheck(touches) {
+      var touchIds = Array.prototype.slice.call(touches).map(function (touch) {
+          return touch.identifier;
+        });
+      for (i = 0; i < drags.length; i++) {
+        if (!drags[i] || touchIds.indexOf(i) >= 0)
+          continue;
+        angular.element(api.dragging[i].image).remove();
+        delete drags[i];
+      }
+    }
     function onEnd(event) {
-      var touch, drag, i, drop;
+      var touch, drag, i, drop, dragend, detail;
+      console.log(event.touches.length, event.changedTouches.length, event.targetTouches.length);
       for (i = 0; i < event.changedTouches.length; i++) {
         touch = event.changedTouches[i];
         drag = drags[touch.identifier];
-        if (drag.state !== 'dragging')
+        delete drags[touch.identifier];
+        detail = {
+          detail: touch.identifier,
+          bubbles: true
+        };
+        if (!(drag && drag.state === 'dragging'))
           continue;
         drag.state = 'dropped';
         if (drag.target) {
-          drop = new CustomEvent('drop', {
-            detail: touch.identifier,
-            bubbles: true
-          });
+          drop = new CustomEvent('drop', detail);
           drag.target.dispatchEvent(drop);
         }
+        dragend = new CustomEvent('dragend', detail);
+        drag.source.dispatchEvent(dragend);
       }
     }
     function elementAt(touch) {
@@ -38,75 +58,78 @@
       }
     }
     function onMove() {
-      var touch, drag, target, i, over, dragstart;
+      var touch, drag, target, i, j, over, dragstart, detail, dragEvent;
       for (i = 0; i < event.changedTouches.length; i++) {
         touch = event.changedTouches[i];
         drag = drags[touch.identifier];
         target = elementAt(touch);
+        detail = {
+          detail: touch.identifier,
+          bubbles: true
+        };
+        if (!drag)
+          continue;
         if (drag.state === 'started') {
-          dragstart = new CustomEvent('dragstart', { detail: touch.identifier });
+          sanityCheck(event.touches);
+          dragstart = new CustomEvent('dragstart', detail);
           drag.source.dispatchEvent(dragstart);
           drag.state = 'dragging';
         }
-        if (!target) {
+        if (drag.state !== 'dragging')
           continue;
-        } else if (target !== drag.target) {
-          if (drag.target)
-            drag.target.dispatchEvent(new CustomEvent('dragleave'));
-          target.dispatchEvent(new CustomEvent('dragenter'));
-          drag.target = target;
-        } else {
-          over = new CustomEvent('dragover', { detail: touch.identifier });
-          over.dataTransfer = {};
-          target.dispatchEvent(over);
+        dragEvent = new CustomEvent('drag', { detail: touch.identifier });
+        dragEvent.clientX = touch.clientX;
+        dragEvent.clientY = touch.clientY;
+        for (j = 0; j < elements.length; j++) {
+          elements[j].dispatchEvent(dragEvent);
         }
+        if (!target)
+          continue;
+        if (target !== drag.target) {
+          if (drag.target) {
+            drag.target.dispatchEvent(new CustomEvent('dragleave', detail));
+          }
+          target.dispatchEvent(new CustomEvent('dragenter', detail));
+          drag.target = target;
+        }
+        over = new CustomEvent('dragover', detail);
+        over.dataTransfer = {};
+        target.dispatchEvent(over);
       }
     }
+    function observeElement(attach, element) {
+      if (elements.indexOf(element) < 0) {
+        elements.push(element);
+      }
+      elements.sort(function (a, b) {
+        if (a.contains(b))
+          return 1;
+        else
+          return 0;
+      });
+    }
     if (!nativeDragDrop($rootElement[0])) {
-      $rootElement[0].addEventListener('touchend', onEnd);
-      $rootElement[0].addEventListener('touchcancel', onEnd);
-      $rootElement[0].addEventListener('touchmove', onMove);
-      var observeElement = virtual.dragleave = virtual.dragenter = virtual.dragover = virtual.drop = function observeElement(attach, element) {
-          if (elements.indexOf(element) < 0) {
-            elements.push(element);
-          }
-          elements.sort(function (a, b) {
-            if (a.contains(b))
-              return 1;
-            else
-              return 0;
-          });
-        };
+      window.addEventListener('touchend', onEnd);
+      window.addEventListener('touchcancel', onEnd);
+      window.addEventListener('touchmove', onMove);
+      'dragleave dragenter dragover drag drop'.split(' ').forEach(function (ev) {
+        virtual[ev] = observeElement;
+      });
       virtual.dragstart = function (attach, element) {
         attach('touchstart', function (event) {
           event.preventDefault();
-          console.log(event.target.textContent);
-          for (var i = 0; i < event.changedTouches.length; i++) {
-            drags[event.changedTouches[i].identifier] = {
+          var touch, drag, i;
+          for (i = 0; i < event.changedTouches.length; i++) {
+            touch = event.changedTouches[i];
+            drag = api.dragging[touch.identifier];
+            if (drag)
+              angular.element(drag.image).remove();
+            drags[touch.identifier] = {
               state: 'started',
               source: event.target
             };
           }
         });
-      };
-      virtual.dragend = function (attach, element) {
-        function onEnd(event) {
-          setTimeout(function () {
-            var touch, drag, dragend;
-            for (var i = 0; i < event.changedTouches.length; i++) {
-              touch = event.changedTouches[i];
-              drag = drags[touch.identifier];
-              if (drag.state === 'dropped') {
-                dragend = new CustomEvent('dragend', { detail: touch.identifier });
-                event.target.dispatchEvent(dragend);
-              } else {
-                drag.state = 'cancelled';
-              }
-            }
-          });
-        }
-        attach('touchend', onEnd);
-        attach('touchcancel', onEnd);
       };
     }
     function addEvent(element) {
@@ -153,9 +176,22 @@
         if (e.dataTransfer)
           e.dataTransfer.effectAllowed = 'move';
         $rootScope.$emit('fn-dragstart', dragging, e);
+        if (!dragging.image)
+          dragging.image = dragging.element.cloneNode(true);
+        dragging.image.style.position = 'fixed';
+        dragging.image.classList.add('fn-dragging-image');
+        dragging.image.style.left = 0;
+        dragging.image.style.top = 0;
+        delete dragging.image.id;
+        document.body.appendChild(dragging.image);
       }).on('dragend', function dragEnd(e) {
         var dragging = fnDragDrop.dragging[e.detail];
         $rootScope.$emit('fn-dragend', dragging, e);
+        document.body.removeChild(dragging.image);
+      }).on('drag', function drag(e) {
+        var dragging = fnDragDrop.dragging[e.detail];
+        $rootScope.$emit('fn-drag', dragging, e);
+        dragging.image.style.transform = 'translate(' + e.clientX + 'px, ' + e.clientY + 'px)';
       });
     };
   }
