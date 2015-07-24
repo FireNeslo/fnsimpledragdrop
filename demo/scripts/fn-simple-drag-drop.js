@@ -37,29 +37,44 @@
         }
       }
     }
+    function dragImage(touch, drag, target) {
+      return function (image) {
+        drag.image = image.cloneNode(true);
+        drag.image.style.position = 'static';
+        drag.image.style.z = 'static';
+        drag.image.classList.add('fn-drag-image');
+      };
+    }
     function onMove() {
-      var touch, drag, target, i, over, dragstart;
+      var touch, drag, target, i, over, dragstart, detail;
       for (i = 0; i < event.changedTouches.length; i++) {
         touch = event.changedTouches[i];
         drag = drags[touch.identifier];
         target = elementAt(touch);
+        detail = {
+          detail: touch.identifier,
+          bubbles: true
+        };
         if (drag.state === 'started') {
-          dragstart = new CustomEvent('dragstart', { detail: touch.identifier });
+          dragstart = new CustomEvent('dragstart', detail);
           drag.source.dispatchEvent(dragstart);
           drag.state = 'dragging';
+          if (!drag.setDragImage) {
+            drag.setDragImage = dragImage(touch, drag, target);
+          }
         }
-        if (!target) {
+        if (!(drag.state === 'dragging' && target))
           continue;
-        } else if (target !== drag.target) {
-          if (drag.target)
-            drag.target.dispatchEvent(new CustomEvent('dragleave'));
-          target.dispatchEvent(new CustomEvent('dragenter'));
+        if (target !== drag.target) {
+          if (drag.target) {
+            drag.target.dispatchEvent(new CustomEvent('dragleave', detail));
+          }
+          target.dispatchEvent(new CustomEvent('dragenter', detail));
           drag.target = target;
-        } else {
-          over = new CustomEvent('dragover', { detail: touch.identifier });
-          over.dataTransfer = {};
-          target.dispatchEvent(over);
         }
+        over = new CustomEvent('dragover', detail);
+        over.dataTransfer = {};
+        target.dispatchEvent(over);
       }
     }
     if (!nativeDragDrop($rootElement[0])) {
