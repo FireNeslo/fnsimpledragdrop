@@ -6,6 +6,7 @@ var rename = require('gulp-rename')
 var wrap = require('gulp-wrapper')
 var path = require('path')
 var tinylr = require('tiny-lr')
+var plumber = require('gulp-plumber')
 var browserSync = require('browser-sync')
 var reload = browserSync.reload
 
@@ -19,12 +20,14 @@ gulp.task('serve', ['watch', 'default'], function() {
 
 gulp.task('default', function() {
 	return gulp.src(['scr/app.js','src/*.js'])
+		.pipe(plumber())
 		.pipe(concat(bower.name +'.js', {newLine: '.'}))
 		.pipe(ngmin())
 		.pipe(wrap({
 			header : "(function (root, factory) {if (typeof define === 'function' && define.amd) {define([], factory)} else if (typeof exports === 'object') {module.exports = factory()} else {factory()}}(this, function () {	return ",
 			footer : "}))"
 		}))
+		.pipe(plumber.stop())
 		.pipe(gulp.dest('.'))
 		.pipe(gulp.dest('./demo/scripts'))
 })

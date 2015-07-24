@@ -2,14 +2,10 @@ directive('fnDragOver', function (fnDragDrop) {
   'use strict'
   return {
     restrict: 'A',
-    require: '^fnDrop',
-    link: function (scope, el, attrs, fnDrop) {
+    link: function (scope, el, attrs) {
       fnDragDrop(el[0])
-        .on("dragover", function onDragOver() {
-          fnDrop.over(scope.$eval(attrs.fnDragOver))
-        })
-        .on("dragleave", function onDragLeave() {
-          fnDrop.leave(scope.$eval(attrs.fnDragOver))
+        .on("dragover", function onDragOver(e) {
+          fnDragDrop.dragging[e.detail].over = scope.$eval(attrs.fnDragOver)
         })
     }
   }

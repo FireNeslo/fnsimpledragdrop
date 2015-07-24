@@ -47,7 +47,7 @@ factory('fnDragDrop', function fnDragDrop($rootElement) {
 
       if (drag.state === 'started'){
         dragstart = new CustomEvent('dragstart', {detail: touch.identifier})
-        event.target.dispatchEvent(dragstart)
+        drag.source.dispatchEvent(dragstart)
         drag.state = 'dragging'
       }
 
@@ -58,7 +58,7 @@ factory('fnDragDrop', function fnDragDrop($rootElement) {
         target.dispatchEvent(new CustomEvent('dragenter'))
         drag.target = target
       } else {
-        over = new CustomEvent('dragover')
+        over = new CustomEvent('dragover', {detail: touch.identifier})
         over.dataTransfer = {}
         target.dispatchEvent(over)
       }
@@ -82,8 +82,12 @@ factory('fnDragDrop', function fnDragDrop($rootElement) {
     virtual.dragstart = function(attach, element) {
       attach('touchstart', function(event) {
         event.preventDefault()
+        console.log(event.target.textContent)
         for (var i = 0; i < event.changedTouches.length; i++) {
-          drags[event.changedTouches[i].identifier] = {state: 'started'}
+          drags[event.changedTouches[i].identifier] = {
+            state: 'started',
+            source: event.target
+          }
         }
       })
     }
@@ -117,9 +121,12 @@ factory('fnDragDrop', function fnDragDrop($rootElement) {
     }
   }
 
-  return function api(element) {
+  function api(element) {
     return {
       on: addEvent(element)
     }
   }
+
+  api.dragging = []
+  return api
 })

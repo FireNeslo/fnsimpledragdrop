@@ -45,7 +45,7 @@
         target = elementAt(touch);
         if (drag.state === 'started') {
           dragstart = new CustomEvent('dragstart', { detail: touch.identifier });
-          event.target.dispatchEvent(dragstart);
+          drag.source.dispatchEvent(dragstart);
           drag.state = 'dragging';
         }
         if (!target) {
@@ -56,7 +56,7 @@
           target.dispatchEvent(new CustomEvent('dragenter'));
           drag.target = target;
         } else {
-          over = new CustomEvent('dragover');
+          over = new CustomEvent('dragover', { detail: touch.identifier });
           over.dataTransfer = {};
           target.dispatchEvent(over);
         }
@@ -80,8 +80,12 @@
       virtual.dragstart = function (attach, element) {
         attach('touchstart', function (event) {
           event.preventDefault();
+          console.log(event.target.textContent);
           for (var i = 0; i < event.changedTouches.length; i++) {
-            drags[event.changedTouches[i].identifier] = { state: 'started' };
+            drags[event.changedTouches[i].identifier] = {
+              state: 'started',
+              source: event.target
+            };
           }
         });
       };
@@ -114,9 +118,11 @@
         return this;
       };
     }
-    return function api(element) {
+    function api(element) {
       return { on: addEvent(element) };
-    };
+    }
+    api.dragging = [];
+    return api;
   }
 ]).directive('fnDragOver', [
   'fnDragDrop',
@@ -124,12 +130,9 @@
     'use strict';
     return {
       restrict: 'A',
-      require: '^fnDrop',
-      link: function (scope, el, attrs, fnDrop) {
-        fnDragDrop(el[0]).on('dragover', function onDragOver() {
-          fnDrop.over(scope.$eval(attrs.fnDragOver));
-        }).on('dragleave', function onDragLeave() {
-          fnDrop.leave(scope.$eval(attrs.fnDragOver));
+      link: function (scope, el, attrs) {
+        fnDragDrop(el[0]).on('dragover', function onDragOver(e) {
+          fnDragDrop.dragging[e.detail].over = scope.$eval(attrs.fnDragOver);
         });
       }
     };
@@ -139,22 +142,20 @@
   'fnDragDrop',
   function ($rootScope, fnDragDrop) {
     'use strict';
-    return function (scope, el, attrs) {
-      var dragging = {
-          element: el,
-          data: {},
-          source: {}
-        };
-      el.attr('draggable', true);
-      fnDragDrop(el[0]).on('dragstart', function dragStart(e) {
-        console.log(e, e.detail);
-        dragging.data[e.detail] = scope.$eval(attrs.fnDrag);
-        dragging.source[e.detail] = scope.$eval(attrs.fnSource);
+    return function (scope, elements, attrs) {
+      elements.attr('draggable', true);
+      fnDragDrop(elements[0]).on('dragstart', function dragStart(e) {
+        var dragging = fnDragDrop.dragging[e.detail] = {
+            element: elements[0],
+            data: scope.$eval(attrs.fnDrag),
+            source: scope.$eval(attrs.fnSource)
+          };
         if (e.dataTransfer)
           e.dataTransfer.effectAllowed = 'move';
         $rootScope.$emit('fn-dragstart', dragging, e);
-      }).on('dragend', function dragEnd() {
-        $rootScope.$emit('fn-dragend', dragging);
+      }).on('dragend', function dragEnd(e) {
+        var dragging = fnDragDrop.dragging[e.detail];
+        $rootScope.$emit('fn-dragend', dragging, e);
       });
     };
   }
@@ -163,13 +164,11 @@
   'fnDragDrop',
   function ($rootScope, fnDragDrop) {
     'use strict';
-    var dragging, over = null;
+    var over = null;
     $rootScope.$on('fn-dragstart', function (event, data) {
-      dragging = data;
       angular.element(data.element).addClass('fn-dragging');
     });
     $rootScope.$on('fn-dragend', function (event, data) {
-      dragging = null;
       angular.element(data.element).removeClass('fn-dragging');
     });
     return {
@@ -197,27 +196,17 @@
           e.preventDefault();
           e.stopPropagation();
           el.removeClass('fn-over');
-          scope.$apply(function () {
+          scope.$applyAsync(function () {
+            var data = fnDragDrop.dragging[e.detail];
             scope.$eval(attrs.fnDrop, {
-              $over: over,
-              $data: dragging.data[e.detail],
-              $source: dragging.source[e.detail],
+              $over: data.over,
+              $data: data.data,
+              $source: data.source,
               $target: scope.$eval(attrs.fnTarget)
             });
           });
         });
-      },
-      controller: [
-        '$scope',
-        function ($scope) {
-          this.over = function (data) {
-            over = data;
-          };
-          this.leave = function (data) {
-            over = null;
-          };
-        }
-      ]
+      }
     };
   }
 ]);}))

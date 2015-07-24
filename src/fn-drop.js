@@ -1,13 +1,11 @@
 directive('fnDrop', function ($rootScope, fnDragDrop) {
   'use strict'
-  var dragging, over = null
+  var over = null
   $rootScope.$on("fn-dragstart", function (event, data) {
-    dragging = data
     angular.element(data.element).addClass("fn-dragging")
   })
 
   $rootScope.$on("fn-dragend", function (event, data) {
-    dragging = null
     angular.element(data.element).removeClass("fn-dragging")
   })
   return {
@@ -39,23 +37,16 @@ directive('fnDrop', function ($rootScope, fnDragDrop) {
           e.preventDefault()
           e.stopPropagation()
           el.removeClass('fn-over')
-          scope.$apply(function () {
+          scope.$applyAsync(function () {
+            var data = fnDragDrop.dragging[e.detail]
             scope.$eval(attrs.fnDrop, {
-              $over: over,
-              $data: dragging.data[e.detail],
-              $source: dragging.source[e.detail],
+              $over: data.over,
+              $data: data.data,
+              $source: data.source,
               $target: scope.$eval(attrs.fnTarget)
             })
           })
         })
-    },
-    controller: function ($scope) {
-      this.over = function (data) {
-        over = data
-      }
-      this.leave = function (data) {
-        over = null
-      }
     }
   }
 })
