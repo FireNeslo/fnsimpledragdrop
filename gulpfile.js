@@ -6,27 +6,17 @@ var rename = require('gulp-rename')
 var wrap = require('gulp-wrapper')
 var path = require('path')
 var tinylr = require('tiny-lr')
+var browserSync = require('browser-sync')
+var reload = browserSync.reload
 
-function server() {
-	var express = require('express')
-	lr = tinylr()
-	var app = express()
-	app
-	.use(express.static(path.join(__dirname,'demo')))
-	.use(tinylr.middleware({ app: app }))
-	app.listen(8080)
-	lr.listen(35729)
-}
-
-function reload(event) {
-	var fileName = path.relative(path.join(__dirname,'demo'), event.path)
-	console.log('reload: ', fileName)
-	lr.changed({
-		body: {
-			files: [fileName]
+gulp.task('serve', ['watch', 'default'], function() {
+	browserSync.create().init({
+		server: {
+			baseDir: './'
 		}
 	})
-}
+})
+
 gulp.task('default', function() {
 	return gulp.src(['scr/app.js','src/*.js'])
 		.pipe(concat(bower.name +'.js', {newLine: '.'}))
@@ -40,8 +30,7 @@ gulp.task('default', function() {
 })
 
 
-gulp.task('demo', ['watch', 'default'],function() {
-	server()
+gulp.task('demo', ['serve'],function() {
 	gulp.watch('demo/scripts/**/*.js', reload)
 	gulp.watch('demo/styles/*.css', reload)
 	gulp.watch('demo/views/*.html', reload)

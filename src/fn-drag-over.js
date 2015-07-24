@@ -6,7 +6,6 @@ directive('fnDragOver', function (fnDragDrop) {
     link: function (scope, el, attrs, fnDrop) {
       fnDragDrop(el[0])
         .on("dragover", function onDragOver() {
-          debugger
           fnDrop.over(scope.$eval(attrs.fnDragOver))
         })
         .on("dragleave", function onDragLeave() {

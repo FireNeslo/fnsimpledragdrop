@@ -42,8 +42,8 @@ directive('fnDrop', function ($rootScope, fnDragDrop) {
           scope.$apply(function () {
             scope.$eval(attrs.fnDrop, {
               $over: over,
-              $data: dragging.data,
-              $source: dragging.source,
+              $data: dragging.data[e.detail],
+              $source: dragging.source[e.detail],
               $target: scope.$eval(attrs.fnTarget)
             })
           })

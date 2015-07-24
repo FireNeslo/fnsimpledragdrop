@@ -1,19 +1,30 @@
 (function (root, factory) {if (typeof define === 'function' && define.amd) {define([], factory)} else if (typeof exports === 'object') {module.exports = factory()} else {factory()}}(this, function () {	return angular.module('fnSimpleDragDrop', []).factory('fnDragDrop', [
   '$rootElement',
   function fnDragDrop($rootElement) {
-    var hovering = null;
     var elements = [];
     var dropped = [];
     var touched = null;
     var virtual = {};
+    var drags = {};
     function nativeDragDrop(el) {
+      return false;
       return 'draggable' in el || 'ondragstart' in el && 'ondrop' in el;
     }
     function onEnd(event) {
-      var drop = new Event('drop');
-      hovering.dispatchEvent(drop);
-      while (hovering = hovering.parentNode) {
-        hovering.dispatchEvent(drop);
+      var touch, drag, i, drop;
+      for (i = 0; i < event.changedTouches.length; i++) {
+        touch = event.changedTouches[i];
+        drag = drags[touch.identifier];
+        if (drag.state !== 'dragging')
+          continue;
+        drag.state = 'dropped';
+        if (drag.target) {
+          drop = new CustomEvent('drop', {
+            detail: touch.identifier,
+            bubbles: true
+          });
+          drag.target.dispatchEvent(drop);
+        }
       }
     }
     function elementAt(touch) {
@@ -27,25 +38,34 @@
       }
     }
     function onMove() {
-      var target = elementAt(event.touches[0]);
-      if (!target)
-        return;
-      if (target !== hovering) {
-        if (hovering)
-          hovering.dispatchEvent(new Event('dragleave'));
-        target.dispatchEvent(new Event('dragenter'));
-        hovering = target;
-      } else {
-        var over = new Event('dragover');
-        over.dataTransfer = {};
-        target.dispatchEvent(over);
+      var touch, drag, target, i, over, dragstart;
+      for (i = 0; i < event.changedTouches.length; i++) {
+        touch = event.changedTouches[i];
+        drag = drags[touch.identifier];
+        target = elementAt(touch);
+        if (drag.state === 'started') {
+          dragstart = new CustomEvent('dragstart', { detail: touch.identifier });
+          event.target.dispatchEvent(dragstart);
+          drag.state = 'dragging';
+        }
+        if (!target) {
+          continue;
+        } else if (target !== drag.target) {
+          if (drag.target)
+            drag.target.dispatchEvent(new CustomEvent('dragleave'));
+          target.dispatchEvent(new CustomEvent('dragenter'));
+          drag.target = target;
+        } else {
+          over = new CustomEvent('dragover');
+          over.dataTransfer = {};
+          target.dispatchEvent(over);
+        }
       }
     }
     if (!nativeDragDrop($rootElement[0])) {
-      console.log('virtual');
-      $rootElement.on('touchend', onEnd);
-      $rootElement.on('touchcancel', onEnd);
-      $rootElement.on('touchmove', onMove);
+      $rootElement[0].addEventListener('touchend', onEnd);
+      $rootElement[0].addEventListener('touchcancel', onEnd);
+      $rootElement[0].addEventListener('touchmove', onMove);
       var observeElement = virtual.dragleave = virtual.dragenter = virtual.dragover = virtual.drop = function observeElement(attach, element) {
           if (elements.indexOf(element) < 0) {
             elements.push(element);
@@ -59,13 +79,26 @@
         };
       virtual.dragstart = function (attach, element) {
         attach('touchstart', function (event) {
-          event.target.dispatchEvent(new Event('dragstart'));
+          event.preventDefault();
+          for (var i = 0; i < event.changedTouches.length; i++) {
+            drags[event.changedTouches[i].identifier] = { state: 'started' };
+          }
         });
       };
       virtual.dragend = function (attach, element) {
         function onEnd(event) {
           setTimeout(function () {
-            event.target.dispatchEvent(new Event('dragend'));
+            var touch, drag, dragend;
+            for (var i = 0; i < event.changedTouches.length; i++) {
+              touch = event.changedTouches[i];
+              drag = drags[touch.identifier];
+              if (drag.state === 'dropped') {
+                dragend = new CustomEvent('dragend', { detail: touch.identifier });
+                event.target.dispatchEvent(dragend);
+              } else {
+                drag.state = 'cancelled';
+              }
+            }
           });
         }
         attach('touchend', onEnd);
@@ -77,10 +110,7 @@
       return function on(event, callback) {
         if (virtual[event])
           virtual[event](attach, element);
-        attach(event, function (e) {
-          console.log(event);
-          callback(e);
-        });
+        attach(event, callback);
         return this;
       };
     }
@@ -97,7 +127,6 @@
       require: '^fnDrop',
       link: function (scope, el, attrs, fnDrop) {
         fnDragDrop(el[0]).on('dragover', function onDragOver() {
-          debugger;
           fnDrop.over(scope.$eval(attrs.fnDragOver));
         }).on('dragleave', function onDragLeave() {
           fnDrop.leave(scope.$eval(attrs.fnDragOver));
@@ -111,11 +140,16 @@
   function ($rootScope, fnDragDrop) {
     'use strict';
     return function (scope, el, attrs) {
-      var dragging = { element: el };
+      var dragging = {
+          element: el,
+          data: {},
+          source: {}
+        };
       el.attr('draggable', true);
       fnDragDrop(el[0]).on('dragstart', function dragStart(e) {
-        dragging.data = scope.$eval(attrs.fnDrag);
-        dragging.source = scope.$eval(attrs.fnSource);
+        console.log(e, e.detail);
+        dragging.data[e.detail] = scope.$eval(attrs.fnDrag);
+        dragging.source[e.detail] = scope.$eval(attrs.fnSource);
         if (e.dataTransfer)
           e.dataTransfer.effectAllowed = 'move';
         $rootScope.$emit('fn-dragstart', dragging, e);
@@ -166,8 +200,8 @@
           scope.$apply(function () {
             scope.$eval(attrs.fnDrop, {
               $over: over,
-              $data: dragging.data,
-              $source: dragging.source,
+              $data: dragging.data[e.detail],
+              $source: dragging.source[e.detail],
               $target: scope.$eval(attrs.fnTarget)
             });
           });
