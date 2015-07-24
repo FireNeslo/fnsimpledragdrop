@@ -1,14 +1,11 @@
 (function (root, factory) {if (typeof define === 'function' && define.amd) {define([], factory)} else if (typeof exports === 'object') {module.exports = factory()} else {factory()}}(this, function () {	return angular.module('fnSimpleDragDrop', []).factory('fnDragDrop', [
-  '$rootElement',
-  function fnDragDrop($rootElement) {
+  '$q',
+  function fnDragDrop($q) {
     var elements = [];
     var dropped = [];
     var touched = null;
-    var virtual = {};
+    var virtual = $q.defer();
     var drags = [];
-    function nativeDragDrop(el) {
-      return 'draggable' in el || 'ondragstart' in el && 'ondrop' in el;
-    }
     /* onEnd will not always fire when multitouching,
     therefore we have to check whether a touch event that no longer exist
     ended or not, and remove the drag image if it has.
@@ -106,7 +103,11 @@
           return 0;
       });
     }
-    if (!nativeDragDrop($rootElement[0])) {
+    /* Drag-and-Drop is basically undetectable.
+    Polyfill as soon as touch events happen. */
+    window.addEventListener('touchstart', function polyfill(event) {
+      event.preventDefault();
+      window.removeEventListener('touchstart', polyfill);
       window.addEventListener('touchend', onEnd);
       window.addEventListener('touchcancel', onEnd);
       window.addEventListener('touchmove', onMove);
@@ -129,12 +130,20 @@
           }
         });
       };
-    }
+      virtual.resolve(event);
+    });
     function addEvent(element) {
       var attach = element.addEventListener.bind(element);
       return function on(event, callback) {
-        if (virtual[event])
-          virtual[event](attach, element);
+        virtual.promise.then(function ($event) {
+          if (virtual[event])
+            virtual[event](attach, element);
+          return $event;
+        }).then(function ($event) {
+          if (event === 'dragstart' && element.contains($event.srcElement)) {
+            element.dispatchEvent($event);
+          }
+        });
         attach(event, callback);
         return this;
       };
