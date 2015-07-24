@@ -12,6 +12,7 @@ directive('fnDrag', function ($rootScope, fnDragDrop) {
 
         if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
         $rootScope.$emit('fn-dragstart', dragging, e)
+        if(e instanceof MouseEvent) return
         if (!dragging.image) dragging.image = dragging.element.cloneNode(true)
         dragging.image.style.position = 'fixed'
         dragging.image.classList.add('fn-dragging-image')
@@ -23,11 +24,13 @@ directive('fnDrag', function ($rootScope, fnDragDrop) {
       .on('dragend', function dragEnd(e) {
         var dragging = fnDragDrop.dragging[e.detail]
         $rootScope.$emit('fn-dragend', dragging, e)
+        if(e instanceof MouseEvent) return
         document.body.removeChild(dragging.image)
       })
       .on('drag', function drag(e) {
         var dragging = fnDragDrop.dragging[e.detail]
         $rootScope.$emit('fn-drag', dragging, e)
+        if(e instanceof MouseEvent) return
         dragging.image.style.transform =
           'translate(' + e.clientX + 'px, ' + e.clientY + 'px)'
       })
