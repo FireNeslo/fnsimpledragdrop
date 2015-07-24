@@ -4,6 +4,12 @@
 .fn-over {
     border: 1px solid blue;
 }
+
+.fn-dragging-image {
+    opacity: 0.6;
+    list-style: none;
+}
+
 .well li {
     margin: 1em;
     cursor: pointer;
