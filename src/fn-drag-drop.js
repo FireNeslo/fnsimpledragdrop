@@ -6,7 +6,6 @@ factory('fnDragDrop', function fnDragDrop($rootElement) {
   var drags = []
 
   function nativeDragDrop(el){
-    return false
     return ('draggable' in el) || ('ondragstart' in el && 'ondrop' in el)
   }
 
@@ -29,7 +28,6 @@ factory('fnDragDrop', function fnDragDrop($rootElement) {
 
   function onEnd(event) {
     var touch, drag, i, drop, dragend, detail
-    console.log(event.touches.length, event.changedTouches.length, event.targetTouches.length)
     for (i = 0; i < event.changedTouches.length; i++) {
       touch = event.changedTouches[i]
       drag = drags[touch.identifier]
