@@ -11,6 +11,10 @@
     ended or not, and remove the drag image if it has.
   */
     function sanityCheck(touches) {
+      // Temporary workaround for where Safari touch Ids are uniquely generated
+      if (!!navigator.userAgent.match(/Version\/[\d\.]+.*Safari/) || !!navigator.userAgent.match(/iPhone/i)) {
+        return;
+      }
       var touchIds = Array.prototype.slice.call(touches).map(function (touch) {
           return touch.identifier;
         });
